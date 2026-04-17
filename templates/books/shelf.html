@@ -1,0 +1,168 @@
+{% extends 'base.html' %}
+
+{% block title %}My Library{% endblock %}
+
+{% block content %}
+
+<style>
+.page-title {
+    font-size: 28px;
+    margin-bottom: 25px;
+    color: #e2e8f0;
+}
+
+/* LIBRARY */
+.library {
+    padding: 10px;
+}
+
+/* SHELF */
+.shelf-row {
+    position: relative;
+    margin-bottom: 90px;
+    padding-top: 25px;
+    display: flex;
+    gap: 30px;
+    flex-wrap: wrap;
+}
+
+/* WOODEN SHELF (IMPROVED) */
+.shelf-row::after {
+    content: "";
+    position: absolute;
+    bottom: -18px;
+    left: 0;
+    width: 100%;
+    height: 18px;
+    background: linear-gradient(135deg, #7c4a21, #3e2a17);
+    border-radius: 6px;
+    box-shadow: 0 12px 20px rgba(0,0,0,0.7);
+}
+
+/* BOOK BLOCK */
+.book-wrapper {
+    width: 110px;
+    text-align: center;
+}
+
+/* BOOK */
+.book {
+    cursor: pointer;
+    position: relative;
+    transition: transform 0.25s ease;
+}
+
+.book:hover {
+    transform: translateY(-12px) scale(1.03);
+}
+
+/* COVER */
+.book img {
+    width: 100%;
+    height: 170px;
+    object-fit: cover;
+    border-radius: 6px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.8);
+}
+
+/* PROGRESS */
+.progress-container {
+    position: absolute;
+    top: -10px;
+    left: 0;
+    width: 100%;
+    height: 6px;
+    background: rgba(255,255,255,0.2);
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, #22c55e, #38bdf8);
+    width: 0%;
+    transition: width 0.4s ease;
+}
+
+/* RETURN BUTTON */
+.return-btn {
+    margin-top: 8px;
+    width: 100%;
+    padding: 6px;
+    font-size: 12px;
+    background: rgba(239,68,68,0.2);
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    color: #ef4444;
+    transition: 0.2s;
+}
+
+.return-btn:hover {
+    background: #ef4444;
+    color: white;
+}
+
+/* EMPTY */
+.empty {
+    text-align: center;
+    padding: 50px;
+    color: #94a3b8;
+}
+</style>
+
+<h1 class="page-title">📚 My Library</h1>
+
+<div class="library">
+
+{% if books %} <div class="shelf-row">
+
+
+    {% for item in books %}
+        <div class="book-wrapper">
+
+            <div class="book" onclick="openBook('{{ item.book.id }}')">
+
+                <div class="progress-container">
+                    <div class="progress-bar"
+                         data-progress="{{ item.progress }}">
+                    </div>
+                </div>
+
+                {% if item.book.cover %}
+                    <img src="{{ item.book.cover.url }}">
+                {% else %}
+                    <img src="https://via.placeholder.com/120x170?text=No+Cover">
+                {% endif %}
+            </div>
+
+            <form method="POST" action="/transactions/return/{{ item.issue_id }}/">
+                {% csrf_token %}
+                <button class="return-btn">
+                    Return
+                </button>
+            </form>
+
+        </div>
+    {% endfor %}
+
+</div>
+
+
+{% else %} <div class="empty"> <h2>No books yet 📚</h2> <p>Request books to start reading</p> </div>
+{% endif %}
+
+</div>
+
+<script>
+function openBook(bookId) {
+    window.location.href = "/reader/read/" + bookId + "/";
+}
+
+document.querySelectorAll('.progress-bar').forEach(bar => {
+    const value = bar.getAttribute('data-progress') || 0;
+    bar.style.width = value + "%";
+});
+</script>
+
+{% endblock %}

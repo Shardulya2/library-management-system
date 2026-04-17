@@ -1,0 +1,91 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<style>
+.confirm-container {
+    max-width: 450px;
+    margin: 80px auto;
+    background: rgba(255,255,255,0.06);
+    padding: 30px 25px;
+    border-radius: 16px;
+    text-align: center;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 12px 35px rgba(0,0,0,0.6);
+}
+
+/* TITLE */
+.confirm-container h2 {
+    margin-bottom: 15px;
+    color: #ef4444;
+}
+
+/* BOOK NAME */
+.book-name {
+    margin-bottom: 25px;
+    font-size: 16px;
+    color: #e2e8f0;
+}
+
+/* BUTTONS */
+.actions {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+}
+
+/* DELETE */
+.delete-btn {
+    padding: 8px 16px;
+    background: rgba(239,68,68,0.2);
+    color: #ef4444;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.delete-btn:hover {
+    background: #ef4444;
+    color: white;
+}
+
+/* CANCEL */
+.cancel-link {
+    padding: 8px 16px;
+    border-radius: 8px;
+    text-decoration: none;
+    background: rgba(255,255,255,0.1);
+    color: #cbd5f5;
+    transition: 0.2s;
+}
+
+.cancel-link:hover {
+    background: #38bdf8;
+    color: black;
+}
+</style>
+
+<div class="confirm-container">
+
+
+<h2>⚠️ Delete Book</h2>
+
+<p class="book-name">
+    Are you sure you want to delete:<br>
+    <strong>{{ book.title }}</strong>
+</p>
+
+<form method="POST">
+    {% csrf_token %}
+
+    <div class="actions">
+        <button class="delete-btn">Delete</button>
+        <a href="/books/admin/" class="cancel-link">Cancel</a>
+    </div>
+</form>
+
+
+</div>
+
+{% endblock %}

@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+    <title>Admin Login</title>
+
+
+<style>
+    body {
+        margin: 0;
+        height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background: linear-gradient(135deg, #0f172a, #1e293b);
+        font-family: 'Poppins', sans-serif;
+        color: #e2e8f0;
+    }
+
+    .card {
+        width: 340px;
+        padding: 35px 28px;
+        background: rgba(255,255,255,0.06);
+        border-radius: 16px;
+        backdrop-filter: blur(10px);
+        box-shadow: 0 15px 40px rgba(0,0,0,0.7);
+        text-align: center;
+    }
+
+    h2 {
+        margin-bottom: 20px;
+        color: #ef4444;
+    }
+
+    /* INPUTS */
+    input {
+        width: 100%;
+        padding: 10px 12px;
+        margin: 10px 0;
+        border-radius: 8px;
+        border: none;
+        outline: none;
+        background: rgba(255,255,255,0.08);
+        color: #e2e8f0;
+    }
+
+    input:focus {
+        box-shadow: 0 0 0 2px rgba(239,68,68,0.4);
+    }
+
+    /* BUTTON */
+    button {
+        width: 100%;
+        padding: 11px;
+        margin-top: 12px;
+        background: rgba(239,68,68,0.2);
+        color: #ef4444;
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: 0.25s;
+    }
+
+    button:hover {
+        background: #ef4444;
+        color: white;
+        transform: scale(1.03);
+    }
+</style>
+
+
+</head>
+<body>
+
+<div class="card">
+    <h2>🛠 Admin Panel</h2>
+
+
+<form method="POST">
+    {% csrf_token %}
+    <input name="username" placeholder="Admin Username">
+    <input name="password" type="password" placeholder="Password">
+    <button>Login</button>
+</form>
+
+
+</div>
+
+</body>
+</html>

@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+    <title>{{ book.title }}</title>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
+
+<style>
+body {
+    margin: 0;
+    background: linear-gradient(135deg, #0f172a, #1e293b);
+    color: #e2e8f0;
+    font-family: 'Poppins', sans-serif;
+    overflow-x: hidden;
+}
+
+/* TOPBAR */
+.topbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    background: rgba(15, 23, 42, 0.95);
+    backdrop-filter: blur(10px);
+    padding: 12px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    z-index: 1000;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.6);
+    box-sizing: border-box;
+}
+
+.top-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.title {
+    font-size: 15px;
+}
+
+.page-indicator {
+    font-size: 13px;
+    color: #94a3b8;
+}
+
+/* CONTROLS */
+.controls {
+    display: flex;
+    gap: 10px;
+    margin-right: 6px;
+}
+
+.controls button {
+    width: 34px;
+    height: 34px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    background: rgba(255,255,255,0.08);
+    color: #e2e8f0;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: 0.2s;
+}
+
+.controls button:hover {
+    background: rgba(255,255,255,0.2);
+}
+
+.close-btn {
+    color: #ef4444;
+}
+
+.close-btn:hover {
+    background: #ef4444;
+    color: white;
+}
+
+.controls button:active {
+    transform: scale(0.9);
+}
+
+/* PDF AREA */
+#pdf-container {
+    margin-top: 80px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-bottom: 30px;
+}
+
+canvas {
+    margin-bottom: 20px;
+    border-radius: 8px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.7);
+}
+</style>
+
+</head>
+<body>
+
+<div class="topbar">
+
+
+<div class="top-left">
+    <span class="title">{{ book.title }}</span>
+    <span class="page-indicator" id="page-indicator">Page 1</span>
+</div>
+
+<div class="controls">
+    <button onclick="zoomOut()">−</button>
+    <button onclick="zoomIn()">+</button>
+    <button class="close-btn" onclick="closeReader()">✕</button>
+</div>
+
+
+</div>
+
+<div id="pdf-container"></div>
+
+<script>
+const url = "{{ book.pdf_file.url }}";
+
+if (!url || url === "undefined") {
+    alert("PDF not found");
+}
+
+const pdfjsLib = window['pdfjs-dist/build/pdf'];
+pdfjsLib.GlobalWorkerOptions.workerSrc =
+    'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js';
+
+let pdfDoc = null;
+let scale = 1.2;
+let container = document.getElementById('pdf-container');
+
+let currentPage = parseInt("{{ last_page|default:'1' }}") || 1;
+let lastSavedPage = 0;
+
+function getCSRFToken() {
+    return document.cookie.split('; ')
+        .find(row => row.startsWith('csrftoken'))
+        ?.split('=')[1];
+}
+
+/* LOAD PDF */
+pdfjsLib.getDocument({ url: url }).promise.then(pdf => {
+    pdfDoc = pdf;
+
+    for (let i = 1; i <= pdf.numPages; i++) {
+        renderPage(i);
+    }
+
+    setTimeout(() => {
+        document.querySelectorAll("canvas")[currentPage - 1]?.scrollIntoView();
+    }, 500);
+});
+
+/* RENDER */
+function renderPage(num) {
+    pdfDoc.getPage(num).then(page => {
+        const viewport = page.getViewport({ scale: scale });
+
+        const canvas = document.createElement("canvas");
+        const ctx = canvas.getContext("2d");
+
+        canvas.height = viewport.height;
+        canvas.width = viewport.width;
+
+        container.appendChild(canvas);
+
+        page.render({
+            canvasContext: ctx,
+            viewport: viewport
+        });
+    });
+}
+
+/* ZOOM */
+function zoomIn() {
+    scale += 0.2;
+    reloadPDF();
+}
+
+function zoomOut() {
+    if (scale <= 0.6) return;
+    scale -= 0.2;
+    reloadPDF();
+}
+
+function reloadPDF() {
+    container.innerHTML = "";
+    for (let i = 1; i <= pdfDoc.numPages; i++) {
+        renderPage(i);
+    }
+}
+
+/* SCROLL TRACK (FIXED) */
+window.addEventListener('scroll', () => {
+    let canvases = document.querySelectorAll("canvas");
+
+    canvases.forEach((canvas, index) => {
+        const rect = canvas.getBoundingClientRect();
+
+        if (rect.top >= 0 && rect.top < window.innerHeight / 2) {
+            let newPage = index + 1;
+
+            if (newPage !== currentPage) {
+                currentPage = newPage;
+
+                document.getElementById("page-indicator").innerText =
+                    "Page " + currentPage;
+
+                if (currentPage !== lastSavedPage) {
+                    lastSavedPage = currentPage;
+                    saveProgress(currentPage);
+                }
+            }
+        }
+    });
+});
+
+/* SAVE */
+function saveProgress(page) {
+    fetch(`/reader/save-progress/{{ book.id }}/`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": getCSRFToken()
+        },
+        body: JSON.stringify({ page: page })
+    })
+    .then(res => res.json())
+    .catch(err => console.error("Save error:", err));
+}
+
+/* CLOSE */
+function closeReader() {
+    window.location.href = "/books/my-books/";
+}
+</script>
+
+</body>
+</html>

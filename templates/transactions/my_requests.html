@@ -1,0 +1,82 @@
+{% extends 'base.html' %}
+
+{% block title %}My Requests{% endblock %}
+
+{% block content %}
+
+<style>
+.page-title {
+    font-size: 26px;
+    margin-bottom: 20px;
+    color: #e2e8f0;
+}
+
+/* CARD STYLE */
+.request-card {
+    background: rgba(255,255,255,0.06);
+    padding: 15px 18px;
+    margin-bottom: 12px;
+    border-radius: 10px;
+    backdrop-filter: blur(6px);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.4);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: 0.25s;
+}
+
+.request-card:hover {
+    transform: translateY(-3px);
+}
+
+/* BOOK NAME */
+.request-card strong {
+    font-size: 15px;
+}
+
+/* STATUS BADGES */
+.status {
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+/* STATUS COLORS */
+.pending {
+    color: #facc15;
+    background: rgba(250,204,21,0.15);
+}
+
+.approved {
+    color: #22c55e;
+    background: rgba(34,197,94,0.15);
+}
+
+.rejected {
+    color: #ef4444;
+    background: rgba(239,68,68,0.15);
+}
+
+/* EMPTY STATE */
+.empty {
+    color: #94a3b8;
+    font-size: 14px;
+}
+</style>
+
+<h1 class="page-title">📩 My Requests</h1>
+
+{% for r in requests %} <div class="request-card"> <div> <strong>{{ r.book }}</strong> </div>
+
+
+    <span class="status {{ r.status }}">
+        {{ r.status|title }}
+    </span>
+</div>
+
+
+{% empty %} <p class="empty">No requests yet</p>
+{% endfor %}
+
+{% endblock %}

@@ -1,0 +1,124 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+
+<style>
+.dashboard-title {
+    font-size: 28px;
+    margin-bottom: 25px;
+    color: #e2e8f0;
+}
+
+/* GRID */
+.cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 25px;
+}
+
+/* CARD = LINK */
+.card {
+    display: block;
+    text-decoration: none;
+    color: inherit;
+    cursor: pointer;
+
+    background: rgba(255,255,255,0.06);
+    padding: 25px 20px;
+    border-radius: 14px;
+    text-align: center;
+    transition: all 0.25s ease;
+    backdrop-filter: blur(8px);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+
+    position: relative;
+    overflow: hidden;
+}
+
+/* FIX CLICK BLOCK */
+.card::before {
+    content: "";
+    position: absolute;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255,255,255,0.12), transparent 60%);
+    top: -50%;
+    left: -50%;
+    opacity: 0;
+    transition: 0.4s;
+
+    pointer-events: none; /* 🔥 CRITICAL */
+}
+
+.card:hover::before {
+    opacity: 1;
+}
+
+.card:hover {
+    transform: translateY(-8px) scale(1.02);
+}
+
+.card:active {
+    transform: scale(0.97);
+}
+
+.card h2 {
+    font-size: 30px;
+    margin-bottom: 8px;
+}
+
+.card p {
+    color: #94a3b8;
+    font-size: 14px;
+    margin-bottom: 12px;
+}
+
+/* BUTTON LOOK */
+.btn {
+    display: inline-block;
+    padding: 6px 14px;
+    border-radius: 6px;
+    background: rgba(255,255,255,0.1);
+    color: #22c55e;
+    font-size: 13px;
+    margin-top: 8px;
+    transition: 0.2s;
+}
+
+.card:hover .btn {
+    background: #22c55e;
+    color: black;
+}
+</style>
+
+<h1 class="dashboard-title">👤 Dashboard</h1>
+
+<div class="cards">
+
+<!-- 📚 My Books -->
+<a href="/books/my-books/" class="card">
+    <h2>{{ issued_count }}</h2>
+    <p>My Books</p>
+    <span class="btn">Open</span>
+</a>
+
+<!-- 📩 Requests -->
+<a href="/transactions/my-requests/" class="card">
+    <h2>{{ pending_count }}</h2>
+    <p>Pending Requests</p>
+    <span class="btn">View</span>
+</a>
+
+<!-- 🔍 Browse -->
+<a href="/books/" class="card">
+    <h2>📚</h2>
+    <p>Browse Books</p>
+    <span class="btn">Explore</span>
+</a>
+
+
+</div>
+
+{% endblock %}
